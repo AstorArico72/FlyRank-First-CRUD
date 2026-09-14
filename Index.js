@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require ("body-parser");
 const app = express();
 const port = 3000;
 
@@ -21,7 +22,6 @@ var TasksList = [
 ];
 
 app.get('/', (req, res) => {
-
   let JsonResponse = {
     "name": "Task API",
     "version": "1.0",
@@ -46,6 +46,26 @@ app.get("/tasks/:id", (req, res) => {
     res.send (task);
   } else {
     res.status (404).send (JsonError);
+  }
+});
+
+app.post("/tasks", bodyParser.json (), (req, res) => {
+  let NewTask = {};
+  let JsonError = {};
+  if (req.body.title && typeof (req.body.title) == 'string') {
+    let LastId = TasksList.sort ((a, b) => b.id - a.id) [0].id;
+    NewTask.id = ++LastId;
+    NewTask.done = false;
+    NewTask.title = req.body.title;
+    TasksList.push (NewTask);
+    res.status (201).send (NewTask);
+  } else {
+    if (req.body.title) {
+      JsonError.error = "Title field is incorrectly formatted.";
+    } else {
+      JsonError.error = "Title field is missing.";
+    }
+    res.status (400).send (JsonError);
   }
 });
 
