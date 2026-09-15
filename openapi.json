@@ -1,0 +1,234 @@
+{
+    "openapi": "3.0.4",
+    "info": {
+        "title": "FlyRank First CRUD",
+        "version": 0.5
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:3000"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Returns the server's status, only 'OK' at the moment.",
+                "responses": {
+                    "200": {
+                        "description": "Everything is OK.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/{id}": {
+            "get": {
+                "summary": "Returns a task.",
+                "responses": {
+                    "200": {
+                        "description": "The selected task exists.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The selected task does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "The ID of the task to view."
+                    }
+                ]
+            },
+            "put": {
+                "summary": "Edits an existing task.",
+                "responses": {
+                    "200": {
+                        "description": "The task was edited correctly. The return value is the edited task.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Something is wrong with the request body. Check the response to know what.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The selected task does not exist.",
+                        "content": {
+                            "text/plain": {
+                                "description": "An error message."
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "The ID of the task to update."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "required": false
+                                    },
+                                    "done": {
+                                        "type": "boolean",
+                                        "required": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes an existing task.",
+                "responses": {
+                    "204": {
+                        "description": "The task was deleted successfully."
+                    },
+                    "404": {
+                        "description": "The selected task does not exist.",
+                        "content": {
+                            "text/plain": {
+                                "description": "An error message."
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "The ID of the task to delete."
+                    }
+                ]
+            }
+        },
+        "/tasks": {
+            "post": {
+                "summary": "Creates a new task.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "required": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The task was created successfully. The return value is the new task.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Something is wrong with the request body. Check the response to know what.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Task": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "done": {
+                        "type": "boolean"
+                    }
+                },
+                "required": ["id", "title", "done"]
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

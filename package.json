@@ -1,6 +1,6 @@
 {
   "name": "flyrank-first-crud",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "description": "First CRUD API for the FlyRank internship, assignment BE-01.",
   "main": "Index.js",
   "scripts": {
@@ -15,6 +15,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "body-parser": "^2.3.0",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "swagger-ui-express": "^5.0.1"
   }
 }

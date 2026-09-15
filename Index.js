@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require ("body-parser");
+const swaggerUi = require ("swagger-ui-express");
+const swaggerDoc = require ("./openapi.json");
 const app = express();
 const port = 3000;
 
@@ -74,28 +76,33 @@ app.put ("/tasks/:id", bodyParser.json (), (req, res) => {
   let NewTask = req.body;
   let JsonError = {};
 
-  if (NewTask.title && typeof (NewTask.title) == "string") {
-    OldTask.title = NewTask.title;
-  } else if (NewTask.title) {
-    JsonError.error = "Incorrectly formatted title field.";
-  }
+  if (NewTask.title || NewTask.done) {
+    if (NewTask.title != undefined) {
+      if (typeof (NewTask.title) === "string") {
+        OldTask.title = NewTask.title;
+      } else {
+        JsonError.error = "Incorrectly formatted title field.";
+        return res.status (400).send (JsonError);
+      }
+    }
 
-  if (NewTask.done && typeof (NewTask.done) == "boolean") {
-    OldTask.done = NewTask.done;
-  } else if (NewTask.done) {
-    JsonError.error = "Incorrectly formatted 'done' field.";
-  }
+    if (NewTask.done != undefined) {
+      if (typeof (NewTask.done) === "boolean") {
+        OldTask.done = NewTask.done;
+      } else {
+        JsonError.error = "Incorrectly formatted 'done' field.";
+        return res.status (400).send (JsonError);
+      }
+    }
 
-  if (!NewTask.title && !NewTask.done) {
-    JsonError.error = "Fields to edit are missing.";
-  }
-
-  if (!OldTask) {
-    res.status (404).send ("Task " + req.params.id + " does not exist.");
-  } else if (JsonError.error) {
-    res.status (400).send (JsonError);
+    if (!OldTask) {
+      res.status (404).send ("Task " + req.params.id + " does not exist.");
+    } else if (JsonError.error == undefined) {
+      res.send (OldTask);
+    }
   } else {
-    res.send (OldTask);
+    JsonError.error = "Fields to edit are missing.";
+    return res.status (400).send (JsonError);
   }
 });
 
@@ -110,6 +117,8 @@ app.delete ("/tasks/:id", (req, res) => {
     res.status (204).send ();
   }
 });
+
+app.use ("/docs", swaggerUi.serve, swaggerUi.setup (swaggerDoc));
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
