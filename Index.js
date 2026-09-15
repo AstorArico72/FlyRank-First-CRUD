@@ -69,6 +69,48 @@ app.post("/tasks", bodyParser.json (), (req, res) => {
   }
 });
 
+app.put ("/tasks/:id", bodyParser.json (), (req, res) => {
+  let OldTask = TasksList.find (task => task.id == req.params.id);
+  let NewTask = req.body;
+  let JsonError = {};
+
+  if (NewTask.title && typeof (NewTask.title) == "string") {
+    OldTask.title = NewTask.title;
+  } else if (NewTask.title) {
+    JsonError.error = "Incorrectly formatted title field.";
+  }
+
+  if (NewTask.done && typeof (NewTask.done) == "boolean") {
+    OldTask.done = NewTask.done;
+  } else if (NewTask.done) {
+    JsonError.error = "Incorrectly formatted 'done' field.";
+  }
+
+  if (!NewTask.title && !NewTask.done) {
+    JsonError.error = "Fields to edit are missing.";
+  }
+
+  if (!OldTask) {
+    res.status (404).send ("Task " + req.params.id + " does not exist.");
+  } else if (JsonError.error) {
+    res.status (400).send (JsonError);
+  } else {
+    res.send (OldTask);
+  }
+});
+
+app.delete ("/tasks/:id", (req, res) => {
+  let FoundTask = TasksList.find (task => task.id == req.params.id);
+
+  if (!FoundTask) {
+    res.status (404).send ("Task " + req.params.id + " does not exist.");
+  } else {
+    let FoundTaskIndex = TasksList.findIndex (task => task.id == req.params.id);
+    TasksList.splice (FoundTaskIndex, 1);
+    res.status (204).send ();
+  }
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
