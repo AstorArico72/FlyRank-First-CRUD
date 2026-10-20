@@ -89,11 +89,9 @@ app.post("/tasks", bodyParser.json (), (req, res) => {
   let NewTask = {};
   let JsonError = {};
   if (req.body.title && typeof (req.body.title) == 'string') {
-    let LastId = TasksList.sort ((a, b) => b.id - a.id) [0].id;
-    NewTask.id = ++LastId;
-    NewTask.done = false;
-    NewTask.title = req.body.title;
-    TasksList.push (NewTask);
+    NewTask.Done = 0;
+    NewTask.Title = req.body.title;
+    taskDB.prepare (`INSERT INTO "Tasks" (Title, Done) VALUES (?, ?);`).run (NewTask.Title, NewTask.Done);
     res.status (201).send (NewTask);
   } else {
     if (req.body.title) {

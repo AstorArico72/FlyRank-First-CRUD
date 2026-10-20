@@ -1,6 +1,6 @@
 {
   "name": "flyrank-first-crud",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "First CRUD API for the FlyRank internship, assignments BE-01 and BE-02.",
   "main": "Index.js",
   "scripts": {
