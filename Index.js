@@ -104,49 +104,66 @@ app.post("/tasks", bodyParser.json (), (req, res) => {
 });
 
 app.put ("/tasks/:id", bodyParser.json (), (req, res) => {
-  let OldTask = TasksList.find (task => task.id == req.params.id);
+  let OldTask = taskDB.prepare (`SELECT * FROM "Tasks" WHERE ID = ?;`).get (req.params.id);
   let NewTask = req.body;
   let JsonError = {};
+  let UpdateQuery = taskDB.prepare (`UPDATE "Tasks" SET Title = COALESCE (@title, Title), Done = COALESCE (@done, Done) WHERE ID = @id;`);
 
-  if (NewTask.title || NewTask.done) {
-    if (NewTask.title != undefined) {
-      if (typeof (NewTask.title) === "string") {
-        OldTask.title = NewTask.title;
-      } else {
-        JsonError.error = "Incorrectly formatted title field.";
-        return res.status (400).send (JsonError);
-      }
+  if (OldTask == undefined) {
+    res.status (404).send ("Task " + req.params.id + " does not exist.");
+  } else {
+    if (NewTask.title != undefined && typeof (NewTask.title) != "string") {
+      JsonError.error = "Incorrectly formatted title field.";
+      return res.status (400).send (JsonError);
     }
 
     if (NewTask.done != undefined) {
-      if (typeof (NewTask.done) === "boolean") {
-        OldTask.done = NewTask.done;
-      } else {
-        JsonError.error = "Incorrectly formatted 'done' field.";
+      if (typeof (NewTask.done) != "number") {
+        JsonError.error = "Incorrectly formatted done field."
+        return res.status (400).send (JsonError);
+      } else if (NewTask.done > 1 || NewTask.done < 0) {
+        JsonError.error = "Done field must be either 0 or 1."
         return res.status (400).send (JsonError);
       }
     }
 
-    if (!OldTask) {
-      res.status (404).send ("Task " + req.params.id + " does not exist.");
-    } else if (JsonError.error == undefined) {
-      res.send (OldTask);
+    if (NewTask.title == undefined && NewTask.done == undefined) {
+      JsonError.error = "Fields to edit are missing.";
+      res.status (400).send (JsonError);
     }
-  } else {
-    JsonError.error = "Fields to edit are missing.";
-    return res.status (400).send (JsonError);
+
+    if (JsonError.error == undefined) {
+      try {
+        UpdateQuery.run ({
+          title: NewTask.title,
+          done: NewTask.done,
+          id: req.params.id
+        });
+        res.send (NewTask);
+      } catch (SqliteError) {
+        JsonError.error = SqliteError;
+        return res.status (500).send (JsonError);
+      }
+    }
   }
 });
 
 app.delete ("/tasks/:id", (req, res) => {
-  let FoundTask = TasksList.find (task => task.id == req.params.id);
+  let FoundTask = taskDB.prepare (`SELECT * FROM "Tasks" WHERE ID = ?;`).get (req.params.id);
+  let DeleteQuery = taskDB.prepare (`DELETE FROM "Tasks" WHERE ID = ?;`);
+  let JsonError = {};
 
   if (!FoundTask) {
-    res.status (404).send ("Task " + req.params.id + " does not exist.");
+    JsonError.error = "Task " + req.params.id + " does not exist.";
+    res.status (404).send (JsonError);
   } else {
-    let FoundTaskIndex = TasksList.findIndex (task => task.id == req.params.id);
-    TasksList.splice (FoundTaskIndex, 1);
-    res.status (204).send ();
+    try {
+      DeleteQuery.run (req.params.id);
+      res.status (204).send ();
+    } catch (SqliteError) {
+      JsonError.error = SqliteError;
+      return res.status (500).send (JsonError);
+    }
   }
 });
 
