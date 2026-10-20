@@ -2,8 +2,29 @@ const express = require('express');
 const bodyParser = require ("body-parser");
 const swaggerUi = require ("swagger-ui-express");
 const swaggerDoc = require ("./openapi.json");
+const Database = require ("better-sqlite3");
+const taskDB = new Database ("./Tasks.db");
 const app = express();
 const port = 3000;
+
+taskDB.pragma ("journal_mode = WAL");
+
+taskDB.prepare (`CREATE TABLE IF NOT EXISTS "Tasks" (
+    "ID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "Title" TEXT NOT NULL,
+    "Done" INTEGER DEFAULT 0 NOT NULL
+  )`).run ();
+  // OMG I'm too used to MySQL I was literally thinking of strict C#-like types.
+  // Now that I think of it, this feels like shifting from Java or C# to Python.
+
+var CountRow = taskDB.prepare (`SELECT COUNT(*) AS total FROM "Tasks";`).get ();
+
+if (CountRow.total == 0) {
+  taskDB.prepare (`INSERT INTO "Tasks" ("ID", "Title", "Done") VALUES
+  (1, 'Get a job', 0),
+  (2, 'Create a list of tasks', 1),
+  (3, 'Have a degree', 1);`).run ();
+}
 
 var TasksList = [
   {
@@ -27,8 +48,10 @@ app.get('/', (req, res) => {
   let JsonResponse = {
     "name": "Task API",
     "version": "1.0",
-    "endpoints": ["/tasks"]
+    "endpoints": ["/tasks"],
+    "total_tasks": CountRow.total
   }
+  
   res.send(JsonResponse);
 });
 
@@ -40,14 +63,13 @@ app.get("/health", (req, res) => {
 });
 
 app.get("/tasks/:id", (req, res) => {
-  let task = TasksList.find (item => item.id == req.params.id);
-  let JsonError = {
-    "error": "Task " + req.params.id + " not found."
-  };
-  if (task) {
-    res.send (task);
-  } else {
+  let task = taskDB.prepare (`SELECT * FROM "Tasks" WHERE ID = ?;`).get (req.params.id);
+  let JsonError = {};
+  if (task == undefined) {
+    JsonError = "Task " + req.params.id + " does not exist.";
     res.status (404).send (JsonError);
+  } else {
+    res.send (task);
   }
 });
 

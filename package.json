@@ -1,7 +1,7 @@
 {
   "name": "flyrank-first-crud",
-  "version": "0.6.0",
-  "description": "First CRUD API for the FlyRank internship, assignment BE-01.",
+  "version": "1.0.0",
+  "description": "First CRUD API for the FlyRank internship, assignments BE-01 and BE-02.",
   "main": "Index.js",
   "scripts": {
     "start": "node Index.js"
@@ -9,11 +9,13 @@
   "keywords": [
     "CRUD",
     "NodeJS",
-    "ExpressJS"
+    "ExpressJS",
+    "SQLite"
   ],
   "author": "Astor Aricó <astorarico72@gmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "body-parser": "^2.3.0",
     "express": "^5.2.1",
     "swagger-ui-express": "^5.0.1"
