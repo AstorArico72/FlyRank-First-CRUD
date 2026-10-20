@@ -62,6 +62,18 @@ app.get("/health", (req, res) => {
   res.send (JsonResponse);
 });
 
+app.get ("/tasks", (req, res) => {
+  let AllTasks = taskDB.prepare (`SELECT * FROM "Tasks";`).all ();
+  let JsonError = {};
+
+  if (AllTasks == undefined) {
+    JsonError = "Database is empty.";
+    res.status (500).send (JsonError);
+  } else {
+    res.send (AllTasks);
+  }
+});
+
 app.get("/tasks/:id", (req, res) => {
   let task = taskDB.prepare (`SELECT * FROM "Tasks" WHERE ID = ?;`).get (req.params.id);
   let JsonError = {};
