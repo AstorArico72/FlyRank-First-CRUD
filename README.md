@@ -4,7 +4,9 @@
 
 Made for the [FlyRank AI Internship's](https://internship.flyrank.ai) Backend AI Engineering track.
 
-This is a CRUD API, which can **c**reate, **r**ead, **u**pdate, and **d**elete tasks, in JSON format. The tasks are saved in memory, so, every time it starts, the list of tasks will reset. Tasks have these properties: **id**, a unique identifier (an integer), **title**, the task's name (a string), and **done**, whether it's done or not (a boolean).
+This is a CRUD API, which can **c**reate, **r**ead, **u**pdate, and **d**elete tasks, in JSON format. The tasks are saved in memory, so, every time it starts, the list of tasks will reset. Tasks have these properties: **ID**, a unique identifier (an integer), **Title**, the task's name (a string), and **Done**, whether it's done or not (a number constrained to 0 or 1).
+
+It interacts with an SQLite database, which is stored in a local file, requires no setup from the user's end, and survives restarts. The database is stored in a file named "Tasks.db", which is created automatically upon server start.
 
 ## Setup
 
@@ -25,7 +27,7 @@ The endpoints are as follows:
 - DELETE `/tasks/:id`, where an existing task can be deleted.
 - GET `/docs`, which serves Swagger UI (see below).
 
-You can use **curl** or **Swagger UI** to interact with the API endpoints.
+You can use **curl** or **Swagger UI** to interact with the API endpoints. You may also use **DB Browser for SQLite** to interact with the database without the API.
 
 ### curl
 
@@ -59,3 +61,17 @@ To use Swagger UI, go to <http://127.0.0.1:3000/docs> on your browser. You shoul
 ![A Swagger UI screenshot.](./Swagger-screenshot.png "That's how Swagger UI should look.")
 
 The UI itself has documentation on what each endpoint does, so, no need to explain further.
+
+### DB Browser for SQLite
+
+*You can download it from here: <https://sqlitebrowser.org/dl/>.*
+
+Click "Open Database" and open **Tasks.db**. The auto-generated database should look as follows:
+
+![Default database as seen in DB Browser](./DB_Browser_Screenshot.png)
+
+You can interact with the database freely. Among other things, you can execute raw SQL queries, like this:
+
+![SQL query example](./DB_Browser_Query_Screenshot.png)
+
+You might also want to check the DB Browser documentation at the [official wiki.](https://github.com/sqlitebrowser/sqlitebrowser/wiki)
